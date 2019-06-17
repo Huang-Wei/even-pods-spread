@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pause
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: pause
+  template:
+    metadata:
+      labels:
+        app: pause
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchFields:
+              - key: metadata.name
+                operator: NotIn
+                values:
+                - kind-worker
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: node
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: pause
+      containers:
+      - name: pause
+        image: k8s.gcr.io/pause:3.1

@@ -1,0 +1,38 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: p1
+value: 1
+description: "priority with value 1"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pause1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pause
+  template:
+    metadata:
+      labels:
+        app: pause
+    spec:
+      priorityClassName: p1
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: zone
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: pause
+      - maxSkew: 1
+        topologyKey: node
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels:
+            app: pause
+      containers:
+      - name: pause1
+        image: k8s.gcr.io/pause:3.1
